@@ -1,0 +1,12 @@
+﻿{
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/.git": true
+    },
+    "folders.exclude": {
+      "bot-app/": false
+    },
+    "search.exclude": {
+      "bot-app/": false
+    }
+}
