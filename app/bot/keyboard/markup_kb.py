@@ -15,3 +15,10 @@ def main_keyboard(user_role: User.Role) -> ReplyKeyboardMarkup:
         kb.button(text = 'Изменить проект')
         kb.button(text = 'Удалить проект')
     return kb.as_markup(resize_keyboard=True)
+
+
+def skip_button() -> ReplyKeyboardMarkup:
+    kb = ReplyKeyboardBuilder()
+    kb.button(text = "Пропустить")
+    kb.adjust(1)
+    return kb.as_markup(resize_keyboard=True)
