@@ -71,4 +71,4 @@ async def webhook(request: Request) -> None:
     logger.info("Update processed")
 
 if __name__ == "__main__":
-    uvicorn.run("main:app",reload=True,port=settings.PORT)
+    uvicorn.run("main:app",reload=True,reload_delay=3,port=settings.PORT,env_file='.env')

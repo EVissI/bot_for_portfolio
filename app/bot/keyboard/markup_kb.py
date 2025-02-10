@@ -23,3 +23,4 @@ def skip_button() -> ReplyKeyboardMarkup:
     kb.button(text = "Пропустить")
     kb.adjust(1)
     return kb.as_markup(resize_keyboard=True)
+

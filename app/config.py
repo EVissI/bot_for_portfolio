@@ -12,7 +12,7 @@ import redis.asyncio as aioredis
 
 
 class Settings(BaseSettings):
-    BOT_TOKEN: SecretStr
+    BOT_TOKEN: SecretStr   
     ADMIN_IDS: List[int]
     BASE_SITE_URL: str
     PORT:int
@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     def get_webhook_url(self) -> str:
         """Возвращает URL вебхука с кодированием специальных символов."""
         return f"{self.BASE_SITE_URL}/webhook"
-    
+
 settings = Settings()
 #редис может понадобиться для хранения fsm состояния
 # redis = aioredis.from_url(
