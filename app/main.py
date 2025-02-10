@@ -1,18 +1,21 @@
-﻿from loguru import logger
-from fastapi import FastAPI
+﻿import uvicorn
+from loguru import logger
+from fastapi import FastAPI, Request
 from contextlib import asynccontextmanager
 from aiogram.types import BotCommand, BotCommandScopeDefault
+from aiogram.types import Update
 
-from config import bot,dp
-from config import settings
+from config import bot,dp,settings
 from bot.middlewares.anti_floud import AntiFloudMiddleware
 
+
+app = FastAPI()
 # Функция, которая настроит командное меню (дефолтное для всех пользователей)
 async def set_commands():
     commands = [BotCommand(command='start', description='Старт')]
     await bot.set_my_commands(commands, BotCommandScopeDefault())
 
-admins = settings.bot.admin_ids
+admins = settings.ADMIN_IDS
 # Функция, которая выполнится когда бот запустится
 async def start_bot():
     await set_commands()
@@ -51,3 +54,15 @@ async def lifespan(app: FastAPI):
     await bot.delete_webhook()
     await stop_bot()
     logger.info("Webhook deleted")
+
+app = FastAPI(lifespan=lifespan)
+
+@app.post("/webhook")
+async def webhook(request: Request) -> None:
+    logger.info("Received webhook request")
+    update = Update.model_validate(await request.json(), context={"bot": bot})
+    await dp.feed_update(bot, update)
+    logger.info("Update processed")
+
+if __name__ == "__main__":
+    uvicorn.run("main:app",reload=True,port=settings.PORT)
