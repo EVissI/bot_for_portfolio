@@ -44,3 +44,13 @@ class Settings(BaseSettings):
     def get_webhook_url(self) -> str:
         """Возвращает URL вебхука с кодированием специальных символов."""
         return f"{self.fastapi.url}/webhook"
+    
+settings = Settings()
+#редис может понадобиться для хранения fsm состояния
+redis = aioredis.from_url(
+        settings.redis.url
+    )
+
+bot = Bot(token=settings.bot.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+dp = Dispatcher(storage=MemoryStorage())
+# dp = Dispatcher(storage=RedisStorage(redis))
