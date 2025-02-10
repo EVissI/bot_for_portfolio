@@ -4,9 +4,9 @@
       "**/.git": true
     },
     "folders.exclude": {
-      "bot-app/": false
+      "app/": false
     },
     "search.exclude": {
-      "bot-app/": false
+      "app/": false
     }
 }
