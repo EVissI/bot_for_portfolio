@@ -7,7 +7,7 @@ from aiogram.types import Update
 
 from config import bot,dp,settings
 from bot.middlewares.anti_floud import AntiFloudMiddleware
-
+from bot.users.router import user_router
 
 app = FastAPI()
 # Функция, которая настроит командное меню (дефолтное для всех пользователей)
@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI):
     #регистрация middleware
     dp.message.middleware(AntiFloudMiddleware(1))
     #регистрация роутеров
-    # dp.include_router(user_router)
+    dp.include_router(user_router)
     await start_bot()
     webhook_url = settings.get_webhook_url()
     await bot.set_webhook(url=webhook_url,
