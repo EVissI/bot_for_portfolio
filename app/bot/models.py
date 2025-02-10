@@ -1,7 +1,6 @@
 ﻿import enum
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import BigInteger,Enum
-from sqlalchemy.orm import relationship
 
 from typing import Optional
 from dao.database import Base
