@@ -14,3 +14,13 @@ class User(Base):
     first_name: Mapped[Optional[str]]
     last_name: Mapped[Optional[str]]
     role: Mapped[Role] = mapped_column(Enum(Role), default=Role.User)
+
+class Project(Base):
+    name: Mapped[str] = mapped_column(unique=True, nullable=False)
+    description_small: Mapped[Optional[str]]
+    description_large: Mapped[Optional[str]]
+    telegram_bot_url: Mapped[Optional[str]]
+    developers: Mapped[str]
+    rating: Mapped[Optional[float]]
+    github_link: Mapped[Optional[str]]
+    

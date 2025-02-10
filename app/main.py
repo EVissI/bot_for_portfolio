@@ -6,8 +6,10 @@ from aiogram.types import BotCommand, BotCommandScopeDefault
 from aiogram.types import Update
 
 from config import bot,dp,settings
+from bot.middlewares.is_admin import CheckIsAdmin
 from bot.middlewares.anti_floud import AntiFloudMiddleware
 from bot.users.router import user_router
+from bot.admin.router import admin_router
 
 app = FastAPI()
 # Функция, которая настроит командное меню (дефолтное для всех пользователей)
@@ -42,9 +44,11 @@ async def stop_bot():
 async def lifespan(app: FastAPI):
     logger.info("Starting bot setup...")
     #регистрация middleware
+    admin_router.message.middleware(CheckIsAdmin())
     dp.message.middleware(AntiFloudMiddleware(1))
     #регистрация роутеров
     dp.include_router(user_router)
+    dp.include_router(admin_router)
     await start_bot()
     webhook_url = settings.get_webhook_url()
     await bot.set_webhook(url=webhook_url,
