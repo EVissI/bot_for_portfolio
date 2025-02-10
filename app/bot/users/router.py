@@ -26,7 +26,7 @@ async def cmd_start(message: Message, command: CommandObject, session, **kwargs)
         )
         if user_info:
             msg = start_message(message.from_user.first_name)
-            await message.answer(msg)
+            await message.answer(msg, reply_markup=main_keyboard(User.Role.Admin))
             return
         if user_id in settings.ADMIN_IDS:
             values = UserModel(
@@ -51,7 +51,7 @@ async def cmd_start(message: Message, command: CommandObject, session, **kwargs)
         await UserDAO.add(session=session, values=values)
     
         msg = start_message(message.from_user.first_name)
-        await message.answer(msg)
+        await message.answer(msg, reply_markup=main_keyboard(User.Role.Admin))
 
     except Exception as e:
         logger.error(
