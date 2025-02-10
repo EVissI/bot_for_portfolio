@@ -14,6 +14,7 @@ def main_keyboard(user_role: User.Role) -> ReplyKeyboardMarkup:
         kb.button(text ='Добавить проект')
         kb.button(text = 'Изменить проект')
         kb.button(text = 'Удалить проект')
+        kb.adjust(2,3)
     return kb.as_markup(resize_keyboard=True)
 
 
