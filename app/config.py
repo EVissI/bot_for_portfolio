@@ -38,7 +38,9 @@ class Settings(BaseSettings):
     log:LogSettings = LogSettings()
     fastapi:FastApiConfig
     model_config = SettingsConfigDict(
-        case_sensitive=False,        
+        case_sensitive=False,   
+        env_nested_delimiter= "__",
+        env_prefix="APP_CONFIG__",
         env_file=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
     )
     def get_webhook_url(self) -> str:
