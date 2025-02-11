@@ -18,9 +18,9 @@ def main_keyboard(user_role: User.Role) -> ReplyKeyboardMarkup:
     return kb.as_markup(resize_keyboard=True)
 
 
-def skip_button() -> ReplyKeyboardMarkup:
+def cancel_button() -> ReplyKeyboardMarkup:
     kb = ReplyKeyboardBuilder()
-    kb.button(text = "Пропустить")
+    kb.button(text = "Отменить создание")
     kb.adjust(1)
     return kb.as_markup(resize_keyboard=True)
 
