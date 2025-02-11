@@ -12,10 +12,10 @@ import redis.asyncio as aioredis
 
 
 class Settings(BaseSettings):
-    BOT_TOKEN: SecretStr   
-    ADMIN_IDS: List[int]
-    BASE_SITE_URL: str
-    PORT:int
+    BOT_TOKEN: SecretStr = ''
+    ADMIN_IDS: List[int] = []
+    BASE_SITE_URL: str = ''
+    PORT:int = 8000
     FORMAT_LOG: str = "{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}"
     LOG_ROTATION: str = "10 MB"
     DB_URL: str = 'sqlite+aiosqlite:///app/data/db.sqlite3'
@@ -31,7 +31,9 @@ settings = Settings()
 # redis = aioredis.from_url(
 #         settings.redis.url
 #     )
-
-bot = Bot(token=settings.BOT_TOKEN.get_secret_value(), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-dp = Dispatcher(storage=MemoryStorage())
+try:
+    bot = Bot(token=settings.BOT_TOKEN.get_secret_value(), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    dp = Dispatcher(storage=MemoryStorage())
+except Exception as e:
+    logger.error('Ошибка инициализации бота: ' + str(e))
 # dp = Dispatcher(storage=RedisStorage(redis))

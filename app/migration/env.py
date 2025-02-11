@@ -13,7 +13,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 from dao import Base, database_url
-from bot.models import User
+from bot.models import User,Project,ProjectRating
 
 config = context.config
 config.set_main_option("sqlalchemy.url", database_url)

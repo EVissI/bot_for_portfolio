@@ -4,16 +4,16 @@ from bot.models import User
 
 class TelegramIDModel(BaseModel):
     telegram_id: int
-
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True
 
 class UserModel(TelegramIDModel):
     """
     Schemas to create user
     """
-    username: str | None
-    first_name: str | None
-    last_name: str | None
+    username: str 
+    first_name: str
+    last_name: str 
     role: User.Role = User.Role.User
 
 class UserFilterModel(BaseModel):
@@ -28,3 +28,11 @@ class UserFilterModel(BaseModel):
 
     class Config:
         from_attributes = True
+
+class ProjectModel(BaseModel):
+    name:str
+    description_small: str
+    description_large:str
+    telegram_bot_url: str
+    developers: str
+    github_link: str
