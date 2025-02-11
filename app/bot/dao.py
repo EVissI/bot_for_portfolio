@@ -1,5 +1,5 @@
 ﻿from dao.base import BaseDAO
-from bot.models import User
+from bot.models import User,Project
 from bot.schemas import UserFilterModel,TelegramIDModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -26,3 +26,6 @@ class UserDAO(BaseDAO[User]):
         """
         filters = TelegramIDModel(telegram_id=telegram_id)
         return await UserDAO.find_one_or_none(session,filters=filters)
+    
+class ProjectDAO(BaseDAO[Project]):
+    model = Project
