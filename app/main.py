@@ -9,7 +9,7 @@ from config import bot,dp,settings
 from bot.middlewares.is_admin import CheckIsAdmin
 from bot.middlewares.anti_floud import AntiFloudMiddleware
 from bot.users.router import user_router
-from bot.admin.routers.main_routerrouter import admin_router
+from bot.admin.routers.main_router import admin_router
 
 app = FastAPI()
 # Функция, которая настроит командное меню (дефолтное для всех пользователей)
