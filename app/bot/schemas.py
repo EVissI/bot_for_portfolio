@@ -29,8 +29,12 @@ class UserFilterModel(BaseModel):
     class Config:
         from_attributes = True
 
-class ProjectModel(BaseModel):
+class ProjectNameModel(BaseModel):
     name:str
+    class Config:
+        from_attributes = True
+
+class ProjectModel(ProjectNameModel):
     description_small: str
     description_large:str
     telegram_bot_url: str
