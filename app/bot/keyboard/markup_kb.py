@@ -53,20 +53,34 @@ class MainKeyboard:
         return kb.as_markup(resize_keyboard=True)
 
 
-def cancel_button(text_key:str) -> ReplyKeyboardMarkup:
-    """
-    text_keys:\n
+class CancelButton:
+    cancel_texts_dict = {
+        'create': 'Отменить создание',
+        'delete': 'Отменить удаление',
+        'update': 'Отменить изменение'
+    }
+
+    @staticmethod
+    def build(text_key: str) -> ReplyKeyboardMarkup:
+        """
         'create'\n
         'delete'\n
         'update'
-    """
-    cancel_texts_dict = {
-        'create':'Отменить создание',
-        'delete':'Отменить удаление',
-        'update':'Отменить изменение'
-    }
-    kb = ReplyKeyboardBuilder()
-    kb.button(text = cancel_texts_dict.get(text_key))
-    kb.adjust(1)
-    return kb.as_markup(resize_keyboard=True)
-
+        """
+        kb = ReplyKeyboardBuilder()
+        cancel_text = CancelButton.cancel_texts_dict.get(text_key)
+        
+        if cancel_text:
+            kb.button(text=cancel_text)
+        
+        kb.adjust(1) 
+        return kb.as_markup(resize_keyboard=True)
+    
+    @staticmethod
+    def get_cancel_texts()->Dict[str, str]:
+        """
+        'create'\n
+        'delete'\n
+        'update'
+        """
+        return CancelButton.cancel_texts_dict
