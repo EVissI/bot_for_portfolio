@@ -5,10 +5,13 @@ from loguru import logger
 from aiogram.filters.callback_data import CallbackData
 from bot.admin.common import state_dict
 
-class AdminCallbackAddProject(CallbackData, prefix="add_project"):
+class AdminCallbackProject(CallbackData, prefix="add_project"):
     action: str
 
-class AdminCallbackAddProjectChange(CallbackData, prefix="add_project_change"):
+class AdminCallbackDeleteProject(CallbackData, prefix="delete_project"):
+    action: str
+
+class AdminCallbackProjectChange(CallbackData, prefix="add_project_change"):
     action:str
 
 def confirm_kb() -> InlineKeyboardMarkup:
@@ -16,20 +19,37 @@ def confirm_kb() -> InlineKeyboardMarkup:
 
     kb.button(
         text="✅ Подтвердить",
-        callback_data=AdminCallbackAddProject(
+        callback_data=AdminCallbackProject(
             action="yes",
         ).pack()
     )
     kb.button(
         text="❌ Отклонить",
-        callback_data=AdminCallbackAddProject(
+        callback_data=AdminCallbackProject(
             action="no",
         ).pack()
     )
     kb.button(
-        text="❌ Изменить",
-        callback_data=AdminCallbackAddProject(
+        text="⚙ Изменить",
+        callback_data=AdminCallbackProject(
             action="change",
+        ).pack()
+    )
+    kb.adjust(2)
+    return kb.as_markup()
+
+def confirm_del_kb() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(
+        text="✅ Удалить",
+        callback_data=AdminCallbackDeleteProject(
+            action="yes",
+        ).pack()
+    )
+    kb.button(
+        text="❌ Оставить",
+        callback_data=AdminCallbackDeleteProject(
+            action="no",
         ).pack()
     )
     kb.adjust(2)
@@ -41,7 +61,7 @@ def change_kb() -> InlineKeyboardMarkup:
     for key,val in state_dict.items():
         kb.button(
             text=val,
-            callback_data=AdminCallbackAddProjectChange(
+            callback_data=AdminCallbackProjectChange(
                 action = key
             ).pack()
         )
