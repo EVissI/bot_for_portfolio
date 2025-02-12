@@ -6,7 +6,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
 from loguru import logger
-from bot.admin.common import add_project_final_msg
+from bot.admin.common import add_project_final_msg,telegram_bot_url_pattern,https_link_pattern
 from bot.schemas import ProjectModel,ProjectNameModel
 from bot.dao import ProjectDAO
 from bot.models import User
@@ -72,7 +72,7 @@ async def process_description_large(message: Message, state: FSMContext):
     )
 
 
-telegram_bot_url_pattern = r"^(@[A-Za-z0-9_]{5,32}bot)$"
+
 @create_project.message(
     F.text.regexp(telegram_bot_url_pattern),
     StateFilter(AddProject.telegram_bot_url),
@@ -91,7 +91,7 @@ async def process_telegram_bot_url(message: Message, state: FSMContext):
 async def warning_telegram_bot_url(message: Message, state: FSMContext):
     await message.answer("Это не похоже на телеговскую ссылку на бота, она должна начинаться на @ и заканчиваться bot\nпопробуйте снова")
 
-https_link_pattern = r"^https://.*"
+
 @create_project.message(
     F.text.regexp(https_link_pattern),
     StateFilter(AddProject.github_link),

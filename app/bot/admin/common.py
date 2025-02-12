@@ -14,3 +14,7 @@ async def add_project_final_msg(data:dict) -> str:
         f"<b>Ссылка на репозиторий</b>: {data.get('github_link')}" if data.get('github_link') else ""
     ]
     ).strip()
+
+
+telegram_bot_url_pattern = r"^(@[A-Za-z0-9_]{5,32}bot)$"
+https_link_pattern = r"^https://.*"
