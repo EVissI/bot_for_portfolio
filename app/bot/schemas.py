@@ -34,5 +34,4 @@ class ProjectModel(BaseModel):
     description_small: str
     description_large:str
     telegram_bot_url: str
-    developers: str
     github_link: str
