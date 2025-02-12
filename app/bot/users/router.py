@@ -5,7 +5,7 @@ from aiogram.filters import CommandObject, CommandStart
 
 from loguru import logger
 
-from bot.keyboard.markup_kb import main_keyboard
+from bot.keyboard.markup_kb import MainKeyboard
 from bot.models import User
 from bot.schemas import TelegramIDModel, UserModel
 from dao.database import connection
@@ -26,7 +26,7 @@ async def cmd_start(message: Message, command: CommandObject, session, **kwargs)
         )
         if user_info:
             msg = start_message(message.from_user.first_name)
-            await message.answer(msg, reply_markup=main_keyboard(user_info.role))
+            await message.answer(msg, reply_markup=MainKeyboard.build(user_info.role))
             return
         if user_id in settings.ADMIN_IDS:
             values = UserModel(
@@ -38,7 +38,7 @@ async def cmd_start(message: Message, command: CommandObject, session, **kwargs)
             )
             await UserDAO.add(session=session, values=values)
             await message.answer(
-                "Привет администрации", reply_markup=main_keyboard(User.Role.Admin)
+                "Привет администрации", reply_markup=MainKeyboard.build(User.Role.Admin)
             )
             return
         values = UserModel(
@@ -50,7 +50,7 @@ async def cmd_start(message: Message, command: CommandObject, session, **kwargs)
         )
         await UserDAO.add(session=session, values=values)
         msg = start_message(message.from_user.first_name)
-        await message.answer(msg, reply_markup=main_keyboard(User.Role.User))
+        await message.answer(msg, reply_markup=MainKeyboard.build(User.Role.User))
 
     except Exception as e:
         logger.error(
