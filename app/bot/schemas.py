@@ -11,9 +11,9 @@ class UserModel(TelegramIDModel):
     """
     Schemas to create user
     """
-    username: str 
+    username: Optional[str]
     first_name: str
-    last_name: str 
+    last_name: Optional[str] 
     role: User.Role = User.Role.User
 
 class UserFilterModel(BaseModel):

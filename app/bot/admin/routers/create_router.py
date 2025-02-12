@@ -11,7 +11,7 @@ from bot.schemas import ProjectModel,ProjectNameModel
 from bot.dao import ProjectDAO
 from bot.models import User
 from bot.keyboard.inline_kb import confirm_kb,change_kb, AdminCallbackAddProject, AdminCallbackAddProjectChange
-from bot.keyboard.markup_kb import cancel_button,main_keyboard
+from bot.keyboard.markup_kb import cancel_button,main_keyboard,admin_kb_texts_dict
 from dao.database import connection
 
 admin_router_create_project = Router()
@@ -25,7 +25,7 @@ class AddProject(StatesGroup):
     change = State()
 
 
-@admin_router_create_project.message(F.text == "Добавить проект")
+@admin_router_create_project.message(F.text == admin_kb_texts_dict.get('add_project'))
 async def add_new_project(message: Message, state: FSMContext):
     await state.set_state(AddProject.name)
     await message.answer("Введите название проекта:", reply_markup=cancel_button())
@@ -89,8 +89,7 @@ async def process_telegram_bot_link(message: Message, state: FSMContext):
     ~F.text.regexp(telegram_bot_link_pattern), StateFilter(AddProject.telegram_bot_link)
 )
 async def warning_telegram_bot_link(message: Message, state: FSMContext):
-    await message.answer("Это не похоже на телеговскую ссылку на бота, она должна начинаться на @ и заканчиваться bot\n\
-                        попробуйте снова")
+    await message.answer("Это не похоже на телеговскую ссылку на бота, она должна начинаться на @ и заканчиваться bot\nпопробуйте снова")
 
 https_link_pattern = r"^https://.*"
 @admin_router_create_project.message(
