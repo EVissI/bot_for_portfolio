@@ -135,20 +135,23 @@ async def process_confirm(query: CallbackQuery, callback_data: AdminCallbackProj
         await query.message.edit_text(query.message.text.replace("\n\nПодтвердите публикацию","\n\nВыберите что нужно поменять:"), reply_markup=change_kb())
         await state.set_state(AddProject.change)
 
-@create_project.callback_query(AdminCallbackProjectChange.filter())
+@create_project.callback_query(StateFilter(AddProject.change) and AdminCallbackProjectChange.filter())
 async def process_change_qr(query: CallbackQuery, callback_data: AdminCallbackProjectChange,state:FSMContext):
+    if callback_data.action == 'back':
+        await query.message.delete()
+        data = await state.get_data()
+        msg = await add_project_final_msg(data)
+        await query.message.answer(msg + "\n\nПодтвердите публикацию",reply_markup=confirm_kb())
+        return
     await query.message.delete()
     await query.message.answer('Теперь введите заменяющее значение',reply_markup=CancelButton.build('create'))
     await state.update_data({'changed_state':callback_data.action})
 
-@create_project.message(AddProject.change)
+
+@create_project.message(StateFilter(AddProject.change))
 async def process_change_msg(message:Message, state:FSMContext):
     data = await state.get_data()
-    match data['changed_state']:
-        case 'description_small':
-            await state.update_data({'description_small':message.text})
-        case 'description_large':
-            await state.update_data({'description_large':message.text})
+    match data.get('changed_state'):
         case 'telegram_bot_url':
             if re.match(telegram_bot_url_pattern, message.text):
                 await state.update_data({'telegram_bot_url': message.text})
@@ -161,6 +164,8 @@ async def process_change_msg(message:Message, state:FSMContext):
             else:
                 await message.answer("Это не похоже на ссылку, попробуйте снова")
                 return
+        case _:
+            await state.update_data({data.get('changed_state'):message.text})
     await state.set_state(AddProject.confirm)
     data = await state.get_data()
     msg = await add_project_final_msg(data)

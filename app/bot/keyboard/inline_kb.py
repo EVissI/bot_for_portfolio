@@ -11,7 +11,10 @@ class AdminCallbackProject(CallbackData, prefix="add_project"):
 class AdminCallbackDeleteProject(CallbackData, prefix="delete_project"):
     action: str
 
-class AdminCallbackProjectChange(CallbackData, prefix="add_project_change"):
+class AdminCallbackProjectChange(CallbackData, prefix="project_change"):
+    action:str
+
+class AdminCallbackProjectUpdate(CallbackData, prefix="project_update"):
     action:str
 
 def confirm_kb() -> InlineKeyboardMarkup:
@@ -65,5 +68,25 @@ def change_kb() -> InlineKeyboardMarkup:
                 action = key
             ).pack()
         )
-    kb.adjust(3)
-    return kb.as_markup()
+    kb.button(text='<--Назад',
+            callback_data=AdminCallbackProjectChange(
+                action = 'back'
+            ).pack())
+    kb.adjust(1)
+    return kb.as_markup()   
+
+def update_kb() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    for key,val in state_dict.items():
+        kb.button(
+            text=val,
+            callback_data=AdminCallbackProjectUpdate(
+                action = key
+            ).pack()
+        )
+    kb.button(text='👌Сохранить',
+            callback_data=AdminCallbackProjectUpdate(
+                action = 'save'
+            ).pack())
+    kb.adjust(1)
+    return kb.as_markup()   
