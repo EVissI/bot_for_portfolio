@@ -12,16 +12,15 @@ import redis.asyncio as aioredis
 
 
 class Settings(BaseSettings):
-    BOT_TOKEN: SecretStr
-    ADMIN_IDS: list[int]
-    BASE_SITE_URL: str 
-    PORT:int = 8000
+    BASE_DIR: str = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     FORMAT_LOG: str = "{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}"
     LOG_ROTATION: str = "10 MB"
     DB_URL: str = 'sqlite+aiosqlite:///app/data/db.sqlite3'
-    class Config:
-        case_sensitive = False,
-        env_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
+    BOT_TOKEN: SecretStr
+    ROOT_ADMIN_ID: int
+    BASE_SITE_URL: str 
+    PORT:int = 8000
+    model_config = SettingsConfigDict(env_file=f"{BASE_DIR}/.env")
     def get_webhook_url(self) -> str:
         """Возвращает URL вебхука с кодированием специальных символов."""
         return f"{self.BASE_SITE_URL}/webhook"

@@ -28,7 +28,7 @@ async def cmd_start(message: Message, command: CommandObject, session, **kwargs)
             msg = start_message(message.from_user.first_name)
             await message.answer(msg, reply_markup=MainKeyboard.build(user_info.role))
             return
-        if user_id in settings.ADMIN_IDS:
+        if user_id == settings.ROOT_ADMIN_ID:
             values = UserModel(
                 telegram_id=user_id,
                 username=message.from_user.username,

@@ -1,4 +1,5 @@
-﻿import uvicorn
+﻿import os
+import uvicorn
 from loguru import logger
 from fastapi import FastAPI, Request
 from contextlib import asynccontextmanager
@@ -17,25 +18,23 @@ async def set_commands():
     commands = [BotCommand(command='start', description='Старт')]
     await bot.set_my_commands(commands, BotCommandScopeDefault())
 
-admins = settings.ADMIN_IDS
+root_admin = settings.ROOT_ADMIN_ID
 # Функция, которая выполнится когда бот запустится
 async def start_bot():
     await set_commands()
-    for admin_id in admins:
-        try:
-            pass
-            # await bot.send_message(admin_id, f'Я запущен🥳.')
-        except:
-            pass
+    try:
+        pass
+        # await bot.send_message(root_admin, f'Я запущен🥳.')
+    except:
+        pass
     logger.info("Бот успешно запущен.")
 
 
 # Функция, которая выполнится когда бот завершит свою работу
 async def stop_bot():
     try:
-        for admin_id in admins:
-            pass
-            # await bot.send_message(admin_id, 'Бот остановлен. За что?😔')
+        pass
+        # await bot.send_message(root_admin, 'Бот остановлен. За что?😔')
     except:
         pass
     logger.error("Бот остановлен!")
@@ -71,4 +70,4 @@ async def webhook(request: Request) -> None:
     logger.info("Update processed")
 
 if __name__ == "__main__":
-    uvicorn.run("main:app",reload=True,reload_delay=3,port=settings.PORT,env_file='.env')
+    uvicorn.run("main:app", reload=True,reload_delay=3,port=settings.PORT,env_file= f"{settings.BASE_DIR}/.env")
