@@ -17,6 +17,11 @@ class AdminCallbackProjectChange(CallbackData, prefix="project_change"):
 class AdminCallbackProjectUpdate(CallbackData, prefix="project_update"):
     action:str
 
+class VoteProject(CallbackData, prefix="rating"):
+    vote:int
+    project_name:str
+    telegram_id:int
+
 def confirm_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
 
@@ -90,3 +95,48 @@ def update_kb() -> InlineKeyboardMarkup:
             ).pack())
     kb.adjust(1)
     return kb.as_markup()   
+
+def vote_rating_kb(project_name:str,telegram_id:int) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(
+        text="💩",
+        callback_data=VoteProject(
+            vote=1,
+            project_name=project_name,
+            telegram_id=telegram_id
+        ).pack()
+    )
+    kb.button(
+        text="😐",
+        callback_data=VoteProject(
+            vote=2,
+            project_name=project_name,
+            telegram_id=telegram_id
+        ).pack()
+    )
+    kb.button(
+        text="🙂",
+        callback_data=VoteProject(
+            vote=3,
+            project_name=project_name,
+            telegram_id=telegram_id
+        ).pack()
+    )
+    kb.button(
+        text="😀",
+        callback_data=VoteProject(
+            vote=4,
+            project_name=project_name,
+            telegram_id=telegram_id
+        ).pack()
+    )
+    kb.button(
+        text="🤩",
+        callback_data=VoteProject(
+            vote=5,
+            project_name=project_name,
+            telegram_id=telegram_id
+        ).pack()
+    )
+    kb.adjust(5)
+    return kb.as_markup() 

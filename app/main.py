@@ -46,8 +46,8 @@ async def lifespan(app: FastAPI):
     admin_router.message.middleware(CheckIsAdmin())
     dp.message.middleware(AntiFloudMiddleware(1))
     #регистрация роутеров
-    dp.include_router(user_router)
     dp.include_router(admin_router)
+    dp.include_router(user_router)
     await start_bot()
     webhook_url = settings.get_webhook_url()
     await bot.set_webhook(url=webhook_url,
