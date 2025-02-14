@@ -8,7 +8,7 @@ from bot.admin.common import state_dict
 class AdminCallbackProject(CallbackData, prefix="add_project"):
     action: str
 
-class ProjectList(CallbackData, prefix="add_project"):
+class ProjectList(CallbackData, prefix="list_project"):
     name: Optional[str]
     page: int = 0
 
@@ -103,7 +103,8 @@ def update_kb() -> InlineKeyboardMarkup:
 def project_list_kb(project_names:list[str],page=0)-> InlineKeyboardMarkup:
     max_buttons = 6 
     kb = InlineKeyboardBuilder()
-
+    if len(project_names) == 0:
+        kb.button(text='Тут пусто:(',callback_data='empety')
     start_idx = page * max_buttons
     end_idx = start_idx + max_buttons
     current_objects = project_names[start_idx:end_idx]
@@ -113,7 +114,9 @@ def project_list_kb(project_names:list[str],page=0)-> InlineKeyboardMarkup:
             name= obj,
             page=page
         ).pack())
-
+    if len(current_objects) % 3 != 0:
+        for i in range((len(current_objects) % 3)+1):
+            kb.button(text=' ',callback_data='empety')
     if len(project_names) > max_buttons:
         if page > 0:
             kb.button(text="<-", callback_data=ProjectList(

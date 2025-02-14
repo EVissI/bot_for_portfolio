@@ -35,6 +35,7 @@ async def cmd_change_project(message:Message,state:FSMContext,session,**kwargs):
 @update_project.callback_query(ProjectList.filter())
 @connection()
 async def process_project_name(query: CallbackQuery, callback_data: ProjectList,state:FSMContext,session,**kwargs):
+
     if callback_data.name is not None:
         project_info = await ProjectDAO.find_one_or_none(
         session=session, filters=ProjectNameModel(name=callback_data.name)
@@ -51,6 +52,10 @@ async def process_project_name(query: CallbackQuery, callback_data: ProjectList,
         for project in projects:
             projects_list.append(project.name)
         await query.message.edit_reply_markup(reply_markup = project_list_kb(projects_list,page=callback_data.page))
+    elif callback_data == 'list_project_empety':
+        await query.answer('Ты зачем сюда жмакаешь?')
+
+
     
 @update_project.message(StateFilter(UpdateProject) and F.text == CancelButton.get_cancel_texts().get('update') )
 async def cmd_cancel(message: Message, state: FSMContext):
