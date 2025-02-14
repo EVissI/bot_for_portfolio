@@ -30,8 +30,8 @@ class Project(Base):
 
 class ProjectRating(Base):
     rating: Mapped[int]
-    telegram_user_id: Mapped[str] = mapped_column(BigInteger, ForeignKey('users.telegram_id'),unique=True)
-    project_name: Mapped[str] = mapped_column(String, ForeignKey('projects.name'),unique=True)
+    telegram_user_id: Mapped[str] = mapped_column(BigInteger, ForeignKey('users.telegram_id'),unique=False)
+    project_name: Mapped[str] = mapped_column(String, ForeignKey('projects.name'),unique=False)
 
     project: Mapped['Project'] = relationship(back_populates="project_ratings")
     user: Mapped['User'] = relationship(back_populates="project_ratings")
