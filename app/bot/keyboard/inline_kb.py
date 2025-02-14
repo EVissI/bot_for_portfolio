@@ -8,6 +8,10 @@ from bot.admin.common import state_dict
 class AdminCallbackProject(CallbackData, prefix="add_project"):
     action: str
 
+class ProjectList(CallbackData, prefix="add_project"):
+    name: Optional[str]
+    page: int = 0
+
 class AdminCallbackDeleteProject(CallbackData, prefix="delete_project"):
     action: str
 
@@ -95,6 +99,36 @@ def update_kb() -> InlineKeyboardMarkup:
             ).pack())
     kb.adjust(1)
     return kb.as_markup()   
+
+def project_list_kb(project_names:list[str],page=0)-> InlineKeyboardMarkup:
+    max_buttons = 6 
+    kb = InlineKeyboardBuilder()
+
+    start_idx = page * max_buttons
+    end_idx = start_idx + max_buttons
+    current_objects = project_names[start_idx:end_idx]
+
+    for obj in current_objects:
+        kb.button(text=obj, callback_data=ProjectList(
+            name= obj,
+            page=page
+        ).pack())
+
+    if len(project_names) > max_buttons:
+        if page > 0:
+            kb.button(text="<-", callback_data=ProjectList(
+                name= None,
+                page=page -1 
+            ).pack())
+
+        if end_idx < len(project_names): 
+            kb.button(text="->", callback_data=ProjectList(
+                name= None,
+                page=page +1 
+            ).pack())
+
+    kb.adjust(3,3,2)
+    return kb.as_markup()
 
 def vote_rating_kb(project_name:str,telegram_id:int) -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()

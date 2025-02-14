@@ -6,11 +6,11 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from loguru import logger
 
-from bot.keyboard.inline_kb import update_kb,AdminCallbackProjectUpdate
+from bot.keyboard.inline_kb import ProjectList, project_list_kb, update_kb,AdminCallbackProjectUpdate
 from bot.admin.common import add_project_final_msg
 from bot.models import User
 from bot.dao import ProjectDAO
-from bot.schemas import ProjectNameModel,ProjectModel
+from bot.schemas import ProjectNameModel,ProjectModel,ProjectFilterModel
 from dao.database import connection
 from bot.keyboard.markup_kb import CancelButton, MainKeyboard
 from bot.admin.common import https_link_pattern,telegram_bot_url_pattern
@@ -24,11 +24,34 @@ class UpdateProject(StatesGroup):
     take_data_to_update = State()
 
 @update_project.message(F.text == MainKeyboard.get_admin_kb_texts().get('change_project'))
-async def cmd_change_project(message:Message,state:FSMContext):
-    await message.answer('Введите название проекта для изменения',reply_markup=CancelButton.build('update'))
-    await state.set_state(UpdateProject.name)
+@connection()
+async def cmd_change_project(message:Message,state:FSMContext,session,**kwargs):
+    projects = await ProjectDAO.find_all(session,ProjectFilterModel())
+    projects_list = []
+    for project in projects:
+        projects_list.append(project.name)
+    await message.answer('Выбери проект который нужно изменить:',reply_markup=project_list_kb(projects_list))
 
-
+@update_project.callback_query(ProjectList.filter())
+@connection()
+async def process_project_name(query: CallbackQuery, callback_data: ProjectList,state:FSMContext,session,**kwargs):
+    if callback_data.name is not None:
+        project_info = await ProjectDAO.find_one_or_none(
+        session=session, filters=ProjectNameModel(name=callback_data.name)
+        )
+        msg = await add_project_final_msg(project_info.to_dict())
+        await query.message.delete()
+        await state.set_data(project_info.to_dict())
+        await query.message.answer(msg + '\n\n <b>Выберите что нужно изменить:</b>',reply_markup=update_kb())
+        await state.set_state(UpdateProject.update)
+        return
+    elif callback_data.name is None:
+        projects = await ProjectDAO.find_all(session,ProjectFilterModel())
+        projects_list = []
+        for project in projects:
+            projects_list.append(project.name)
+        await query.message.edit_reply_markup(reply_markup = project_list_kb(projects_list,page=callback_data.page))
+    
 @update_project.message(StateFilter(UpdateProject) and F.text == CancelButton.get_cancel_texts().get('update') )
 async def cmd_cancel(message: Message, state: FSMContext):
     await state.clear()
@@ -36,22 +59,6 @@ async def cmd_cancel(message: Message, state: FSMContext):
         f"Ок,возвращаю в главное меню", reply_markup=MainKeyboard.build(User.Role.Admin)
     )
 
-@update_project.message(StateFilter(UpdateProject.name), F.text)
-@connection()
-async def find_project_by_name(message:Message,state:FSMContext,session,**kwargs):
-    project_info = await ProjectDAO.find_one_or_none(
-        session=session, filters=ProjectNameModel(name=message.text)
-    )
-    if not project_info:
-        await message.answer(
-            "Ничего не нашел, попробуй еще раз",
-            reply_markup=CancelButton.build('update'),
-        )
-        return
-    msg = await add_project_final_msg(project_info.to_dict())
-    await state.set_data(project_info.to_dict())
-    await message.answer(msg + '\n\n <b>Выберите что нужно изменить:</b>',reply_markup=update_kb())
-    await state.set_state(UpdateProject.update)
 
 @update_project.callback_query(AdminCallbackProjectUpdate.filter())
 @connection()
@@ -73,6 +80,10 @@ async def process_update_project_qr(query: CallbackQuery, callback_data: AdminCa
             await state.update_data({'update_data':callback_data.action})
             await state.set_state(UpdateProject.take_data_to_update)
             await query.message.answer('Введите новые данные', reply_markup=CancelButton.build('update'))
+
+@update_project.message(StateFilter(UpdateProject.take_data_to_update),~F.text)
+async def warning_not_text(message:Message):
+    await message.answer("Только текст,брача")
 
 @update_project.message(StateFilter(UpdateProject.take_data_to_update))
 async def process_update_project_msg(message:Message,state:FSMContext):
