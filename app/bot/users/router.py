@@ -157,11 +157,12 @@ async def cmd_my_projects(message: Message,user_info:User, session, **kwargs):
         for project in projects:
             msg += '\n'.join(
                 [
+                    '_______________________________________________',
                     f'💼Проект: {project.name}',
                     f'📝Описание проекта: {project.description_small}',
                     f'⭐Оценка: <b>{project.rating}</b>',
                     f'Подробная информация - /project_{project.name}',
-                    '\n'
+                    '_______________________________________________'
                 ]
             )
     else:
