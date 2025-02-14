@@ -11,7 +11,7 @@ del_kbd = ReplyKeyboardRemove()
 class MainKeyboard:
     user_kb_texts_dict = {
         'my_projects': 'Мои проекты',
-        'contacts': 'Способы связи'
+        'contacts': 'Мой тг'
     }
 
     admin_kb_texts_dict = {
