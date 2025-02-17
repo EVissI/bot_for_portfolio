@@ -1,14 +1,11 @@
 ﻿import os
-from typing import List
 from loguru import logger
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.client.default import DefaultBotProperties
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
-import redis.asyncio as aioredis
 
 
 class Settings(BaseSettings):
@@ -18,12 +15,9 @@ class Settings(BaseSettings):
     DB_URL: str = 'sqlite+aiosqlite:///app/data/db.sqlite3'
     BOT_TOKEN: SecretStr
     ROOT_ADMIN_ID: int
-    BASE_SITE_URL: str 
-    PORT:int = 8000
+    PORT:int = 4566
     model_config = SettingsConfigDict(env_file=f"{BASE_DIR}/.env")
-    def get_webhook_url(self) -> str:
-        """Возвращает URL вебхука с кодированием специальных символов."""
-        return f"{self.BASE_SITE_URL}/webhook"
+
 
 settings = Settings()
 

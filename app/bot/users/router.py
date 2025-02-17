@@ -82,7 +82,7 @@ async def cmd_contact(message: Message):
 @connection()
 async def cmd_full_info_project(message: Message, command: CommandObject, user_info: User, session, **kwargs):
     try:
-        project_name: str = command.command.split('_')[1]
+        project_name: str = command.command.replace('project_','')
         project: Project = await ProjectDAO.find_one_or_none(session, ProjectNameModel(name=project_name))
         if project:
             msg = '\n'.join(
@@ -171,12 +171,12 @@ async def cmd_my_projects(message: Message, user_info: User, session, **kwargs):
             for project in projects:
                 msg += '\n'.join(
                     [
-                        '\n*-*',
+                        '\n*-----------*',
                         f'💼Проект: {project.name}',
                         f'📝Описание проекта: {project.description_small}',
                         f'⭐Оценка: <b>{project.rating}</b>',
                         f'Подробная информация - /project_{project.name}',
-                        '*-*'
+                        '*-------------*'
                     ]
                 )
         else:
