@@ -17,11 +17,12 @@ async def set_commands():
     commands = [BotCommand(command='start', description='Старт'),BotCommand(command='contact', description='контакты'),BotCommand(command='my_projects', description='мои проекты')]
     await bot.set_my_commands(commands, BotCommandScopeDefault())
 
-root_admin = settings.ROOT_ADMIN_ID
+root_admins = settings.ROOT_ADMIN_IDS
 async def start_bot():
     await set_commands()
     try:
-        await bot.send_message(root_admin, f'Я запущен🥳.')
+        for admin in root_admins:
+            await bot.send_message(admin, f'Я запущен🥳.')
     except:
         pass
     logger.info("Бот успешно запущен.")
@@ -29,10 +30,12 @@ async def start_bot():
 
 async def stop_bot():
     try:
-        await bot.send_message(root_admin, 'Бот остановлен. За что?😔')
+        for admin in root_admins:
+            await bot.send_message(admin, 'Бот остановлен. За что?😔')
     except:
         pass
     logger.error("Бот остановлен!")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -45,13 +48,13 @@ async def lifespan(app: FastAPI):
     await dp.start_polling(bot,
                         drop_pending_updates=True,
                         allowed_updates=dp.resolve_used_update_types())
-    yield
-    await bot.session.close()
+    yield 
+    await dp.stop_polling()
     logger.info("Shutting down bot...")
-    await stop_bot()
+    await stop_bot() 
 
 app = FastAPI(lifespan=lifespan)
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", reload=True,reload_delay=3,port=settings.PORT,env_file= f"{settings.BASE_DIR}/.env")
+    uvicorn.run("main:app", reload=False,reload_delay=3,port=settings.PORT,env_file= f"{settings.BASE_DIR}/.env")

@@ -1,4 +1,5 @@
-﻿state_dict = {
+﻿
+state_dict = {
     "description_small": "краткое описание проекта",
     "description_large": "полное описание проекта",
     "telegram_bot_url": "ссылку на бота",
@@ -18,3 +19,5 @@ async def add_project_final_msg(data:dict) -> str:
 
 telegram_bot_url_pattern = r"^(@[A-Za-z0-9_]{5,32}bot)$"
 https_link_pattern = r"^https://.*"
+
+

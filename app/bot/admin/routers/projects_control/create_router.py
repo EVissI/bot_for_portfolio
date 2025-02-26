@@ -2,7 +2,6 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import StateFilter
-from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
 from loguru import logger
@@ -13,7 +12,6 @@ from bot.admin.common import (
 )
 from bot.schemas import ProjectModel, ProjectNameModel
 from bot.dao import ProjectDAO
-from bot.models import User
 from bot.keyboard.inline_kb import (
     confirm_kb,
     change_kb,
@@ -21,19 +19,10 @@ from bot.keyboard.inline_kb import (
     AdminCallbackProjectChange,
 )
 from bot.keyboard.markup_kb import CancelButton, MainKeyboard
+from bot.admin.states import AddProject, AdminPanelStates
 from dao.database import connection
-
 create_project = Router()
 
-
-class AddProject(StatesGroup):
-    name = State()
-    description_small = State()
-    description_large = State()
-    telegram_bot_url = State()
-    github_link = State()
-    confirm = State()
-    change = State()
 
 
 @create_project.message(~F.text, StateFilter(AddProject))
@@ -41,7 +30,7 @@ async def warning_not_text(message: Message):
     await message.answer("Я ожидаю от тебя текст, а не что-то другое")
 
 
-@create_project.message(F.text == MainKeyboard.get_admin_kb_texts().get("add_project"))
+@create_project.message(F.text == MainKeyboard.get_project_contol_kb().get("add_project"), StateFilter(AdminPanelStates.project_control))
 async def add_new_project(message: Message, state: FSMContext):
     await state.set_state(AddProject.name)
     await message.answer(
@@ -53,9 +42,9 @@ async def add_new_project(message: Message, state: FSMContext):
     StateFilter(AddProject) and F.text == CancelButton.get_cancel_texts().get("create")
 )
 async def cancel_dialog(message: Message, state: FSMContext):
-    await state.clear()
+    await state.set_state(AdminPanelStates.project_control)
     await message.answer(
-        f"Окей, отменяю", reply_markup=MainKeyboard.build(User.Role.Admin)
+        f"Окей, отменяю", reply_markup=MainKeyboard.build_project_cotrol_panel()
     )
 
 
@@ -157,16 +146,16 @@ async def process_confirm(
         await query.message.delete()
         await query.message.answer(
             "Добавление прошло успешно",
-            reply_markup=MainKeyboard.build(User.Role.Admin),
+            reply_markup=MainKeyboard.build_project_cotrol_panel(),
         )
-        await state.clear()
+        await state.set_state(AdminPanelStates.project_control)
     elif callback_data.action == "no":
         await query.message.delete()
         await query.message.answer(
             "Понял, отменяю публикацию",
-            reply_markup=MainKeyboard.build(User.Role.Admin),
+            reply_markup=MainKeyboard.build_project_cotrol_panel(),
         )
-        await state.clear()
+        await state.set_state(AdminPanelStates.project_control)
     elif callback_data.action == "change":
         await query.message.edit_text(
             query.message.text.replace(

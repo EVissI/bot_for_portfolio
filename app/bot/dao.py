@@ -1,9 +1,8 @@
-﻿from dao.database import connection
+﻿
 from dao.base import BaseDAO
 from bot.models import User,Project,ProjectRating
 from bot.schemas import UserFilterModel,TelegramIDModel
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import event
 
 class UserDAO(BaseDAO[User]):
     model = User

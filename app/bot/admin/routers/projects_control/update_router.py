@@ -2,13 +2,12 @@
 from aiogram import Router,F
 from aiogram.types import Message,CallbackQuery
 from aiogram.filters import StateFilter
-from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from loguru import logger
 
+from bot.admin.states import AdminPanelStates, UpdateProject
 from bot.keyboard.inline_kb import ProjectList, project_list_kb, update_kb,AdminCallbackProjectUpdate
 from bot.admin.common import add_project_final_msg
-from bot.models import User
 from bot.dao import ProjectDAO
 from bot.schemas import ProjectNameModel,ProjectModel,ProjectFilterModel
 from dao.database import connection
@@ -18,25 +17,21 @@ from bot.admin.common import https_link_pattern,telegram_bot_url_pattern
 
 update_project = Router()
 
-class UpdateProject(StatesGroup):
-    name = State()
-    update = State()
-    take_data_to_update = State()
 
-@update_project.message(F.text == MainKeyboard.get_admin_kb_texts().get('change_project'))
+
+@update_project.message(F.text == MainKeyboard.get_project_contol_kb().get('change_project'),StateFilter(AdminPanelStates.project_control))
 @connection()
 async def cmd_change_project(message:Message,state:FSMContext,session,**kwargs):
     projects = await ProjectDAO.find_all(session,ProjectFilterModel())
     projects_list = []
     for project in projects:
         projects_list.append(project.name)
-    await message.answer('Выбери проект который нужно изменить:',reply_markup=project_list_kb(projects_list))
+    await message.answer('Выбери проект который нужно изменить:',reply_markup=project_list_kb(projects_list,'update'))
 
-@update_project.callback_query(ProjectList.filter())
+@update_project.callback_query(ProjectList.filter(F.action == 'update'))
 @connection()
 async def process_project_name(query: CallbackQuery, callback_data: ProjectList,state:FSMContext,session,**kwargs):
-
-    if callback_data.name is not None:
+    if callback_data.name is not None and not callback_data.is_empety:
         project_info = await ProjectDAO.find_one_or_none(
         session=session, filters=ProjectNameModel(name=callback_data.name)
         )
@@ -46,22 +41,22 @@ async def process_project_name(query: CallbackQuery, callback_data: ProjectList,
         await query.message.answer(msg + '\n\n <b>Выберите что нужно изменить:</b>',reply_markup=update_kb())
         await state.set_state(UpdateProject.update)
         return
-    elif callback_data.name is None:
+    elif callback_data.name is None and not callback_data.is_empety:
         projects = await ProjectDAO.find_all(session,ProjectFilterModel())
         projects_list = []
         for project in projects:
             projects_list.append(project.name)
-        await query.message.edit_reply_markup(reply_markup = project_list_kb(projects_list,page=callback_data.page))
-    elif callback_data == 'list_project_empety':
+        await query.message.edit_reply_markup(reply_markup = project_list_kb(projects_list,'update',page=callback_data.page))
+    elif callback_data.is_empety:
         await query.answer('Ты зачем сюда жмакаешь?')
 
 
     
 @update_project.message(StateFilter(UpdateProject) and F.text == CancelButton.get_cancel_texts().get('update') )
 async def cmd_cancel(message: Message, state: FSMContext):
-    await state.clear()
+    await state.set_state(AdminPanelStates.project_control)
     await message.answer(
-        f"Ок,возвращаю в главное меню", reply_markup=MainKeyboard.build(User.Role.Admin)
+        f"Ок,возвращаю в главное меню", reply_markup= MainKeyboard.build_project_cotrol_panel()
     )
 
 
@@ -78,8 +73,8 @@ async def process_update_project_qr(query: CallbackQuery, callback_data: AdminCa
             project_info = ProjectModel.model_validate(project_info)
             await ProjectDAO.update(session=session,filters=ProjectNameModel(name=data.get('name')),values = project_info)
             await query.message.delete()
-            await query.message.answer('Данные обновленны',reply_markup=MainKeyboard.build(User.Role.Admin))
-            await state.clear()
+            await query.message.answer('Данные обновленны',reply_markup=MainKeyboard.build_project_cotrol_panel())
+            await state.set_state(AdminPanelStates.project_control)
         case _:
             await query.message.delete()
             await state.update_data({'update_data':callback_data.action})

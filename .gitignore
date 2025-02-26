@@ -173,3 +173,5 @@ log_error.txt
 
 # PyPI configuration file
 .pypirc
+
+.vscode

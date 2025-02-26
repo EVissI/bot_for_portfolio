@@ -87,5 +87,6 @@ venv/
 # VS Code
 .vscode/
 
+#logs
 log.txt
 log_error.txt

@@ -8,18 +8,12 @@ class TelegramIDModel(BaseModel):
         from_attributes = True
 
 class UserModel(TelegramIDModel):
-    """
-    Schemas to create user
-    """
     username: Optional[str]
     first_name: str
     last_name: Optional[str] 
     role: User.Role = User.Role.User
 
 class UserFilterModel(BaseModel):
-    """
-    Schemas to find user
-    """
     telegram_id: Optional[int] = None
     username: Optional[str] = None
     first_name: Optional[str] = None

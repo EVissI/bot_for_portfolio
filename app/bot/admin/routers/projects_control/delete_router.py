@@ -23,7 +23,7 @@ delete_project = Router()
 
 
 @delete_project.message(
-    F.text == MainKeyboard.get_admin_kb_texts().get("delete_project")
+    F.text == MainKeyboard.get_project_contol_kb().get("delete_project")
 )
 @connection()
 async def cmd_delete_project(message: Message, state: FSMContext,session,**kwargs):
@@ -31,13 +31,13 @@ async def cmd_delete_project(message: Message, state: FSMContext,session,**kwarg
     projects_list = []
     for project in projects:
         projects_list.append(project.name)
-    await message.answer('Выбери проект который исстребляем:',reply_markup=project_list_kb(projects_list))
+    await message.answer('Выбери проект который исстребляем:',reply_markup=project_list_kb(projects_list,'delete'))
 
 
-@delete_project.callback_query(ProjectList.filter())
+@delete_project.callback_query(ProjectList.filter(F.action == 'delete'))
 @connection()
 async def process_project_name(query: CallbackQuery, callback_data: ProjectList,state:FSMContext,session,**kwargs):
-    if callback_data.name is not None:
+    if callback_data.name is not None and not callback_data.is_empety:
         project_info = await ProjectDAO.find_one_or_none(
         session=session, filters=ProjectNameModel(name=callback_data.name)
         )
@@ -49,13 +49,13 @@ async def process_project_name(query: CallbackQuery, callback_data: ProjectList,
         )
         await state.set_state(DeleteProject.confirm)
         return
-    elif callback_data.name is None:
+    elif callback_data.name is None and not callback_data.is_empety:
         projects = await ProjectDAO.find_all(session,ProjectFilterModel())
         projects_list = []
         for project in projects:
             projects_list.append(project.name)
-        await query.message.edit_reply_markup(reply_markup = project_list_kb(projects_list,page=callback_data.page))
-    elif callback_data == 'list_project_empety':
+        await query.message.edit_reply_markup(reply_markup = project_list_kb(projects_list,'delete',page=callback_data.page))
+    elif callback_data.is_empety:
         await query.answer('Ты зачем сюда жмакаешь?')
 
 
@@ -63,7 +63,7 @@ async def process_project_name(query: CallbackQuery, callback_data: ProjectList,
 async def cmd_cancel(message: Message, state: FSMContext):
     await state.clear()
     await message.answer(
-        f"Ок,возвращаю в главное меню", reply_markup=MainKeyboard.build(User.Role.Admin)
+        f"Ок,возвращаю в главное меню", reply_markup= MainKeyboard.build_project_cotrol_panel()
     )
 
 
@@ -79,8 +79,8 @@ async def process_delete_project_qr(
             session=session, filters=ProjectNameModel(name=project_name)
         )
         await query.message.delete()
-        await query.message.answer(f'Удалил проект {project_name}',reply_markup= MainKeyboard.build(User.Role.Admin))
+        await query.message.answer(f'Удалил проект {project_name}',reply_markup= MainKeyboard.build_project_cotrol_panel())
     if callback_data.action == "no":
         await query.message.delete()
         await state.clear()
-        await query.message.answer(f'Не надо, так не надо',reply_markup= MainKeyboard.build(User.Role.Admin))
+        await query.message.answer(f'Не надо, так не надо',reply_markup=  MainKeyboard.build_project_cotrol_panel())

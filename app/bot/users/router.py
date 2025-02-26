@@ -1,7 +1,6 @@
 ﻿import re
-from typing import Any, Dict
-from aiogram.dispatcher.router import Router
-from aiogram import F
+
+from aiogram import F,Router
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandObject, CommandStart,Command
 
@@ -18,7 +17,7 @@ from bot.schemas import (TelegramIDModel,
 from dao.database import connection
 from bot.dao import UserDAO, ProjectDAO,ProjectRatingDAO
 
-from config import settings
+from config import settings,bot
 
 from . import start_message, contact_message,vote_responses
 
@@ -34,9 +33,9 @@ async def cmd_start(message: Message, session, **kwargs):
         )
         if user_info:
             msg = start_message(message.from_user.first_name)
-            await message.answer(msg, reply_markup=MainKeyboard.build(user_info.role))
+            await message.answer(msg, reply_markup=MainKeyboard.build_main_kb(user_info.role))
             return
-        if user_id == settings.ROOT_ADMIN_ID:
+        if user_id in settings.ROOT_ADMIN_IDS:
             values = UserModel(
                 telegram_id=user_id,
                 username=message.from_user.username,
@@ -46,7 +45,7 @@ async def cmd_start(message: Message, session, **kwargs):
             )
             await UserDAO.add(session=session, values=values)
             await message.answer(
-                "Привет администрации", reply_markup=MainKeyboard.build(User.Role.Admin)
+                "Привет администрации", reply_markup=MainKeyboard.build_main_kb(User.Role.Admin)
             )
             return
         values = UserModel(
@@ -58,8 +57,9 @@ async def cmd_start(message: Message, session, **kwargs):
         )
         await UserDAO.add(session=session, values=values)
         msg = start_message(message.from_user.first_name)
-        await message.answer(msg, reply_markup=MainKeyboard.build(User.Role.User))
-
+        await message.answer(msg, reply_markup=MainKeyboard.build_main_kb(User.Role.User))
+        for admin in settings.ROOT_ADMIN_IDS:
+            await bot.send_message(admin,f'К тебе зашел новый юзер {message.from_user.first_name} [id: {message.from_user.id}]')
     except Exception as e:
         logger.error(
             f"Ошибка при выполнении команды /start для пользователя {message.from_user.id}: {e}"
@@ -171,19 +171,19 @@ async def cmd_my_projects(message: Message, user_info: User, session, **kwargs):
             for project in projects:
                 msg += '\n'.join(
                     [
-                        '\n*-----------*',
+                        '\n-----------',
                         f'💼Проект: {project.name}',
                         f'📝Описание проекта: {project.description_small}',
                         f'⭐Оценка: <b>{project.rating}</b>',
                         f'Подробная информация - /project_{project.name}',
-                        '*-------------*'
+                        '-------------'
                     ]
                 )
         else:
             msg = 'Тут пока пусто:('
         await message.answer(
             msg,
-            reply_markup=MainKeyboard.build(user_info.role),
+            reply_markup=MainKeyboard.build_main_kb(user_info.role),
         )
     except Exception as e:
         logger.error(f"Ошибка при выполнении команды моих проектов для пользователя {message.from_user.id}: {e}")
@@ -195,7 +195,7 @@ async def cmd_unknow(message: Message, user_info: User):
     try:
         await message.answer(
             "Я не знаю такой команды, пользуетесь только клавиатурой",
-            reply_markup=MainKeyboard.build(user_info.role),
+            reply_markup=MainKeyboard.build_main_kb(user_info.role),
         )
     except Exception as e:
         logger.error(f"Ошибка при выполнении неизвестной команды для пользователя {message.from_user.id}: {e}")
