@@ -16,7 +16,7 @@ from app.dao import Base, database_url
 from app.bot.models import User,Project,ProjectRating
 
 config = context.config
-config.set_main_option("sqlalchemy.url", database_url)
+config.set_main_option("sqlalchemy.url", str(database_url))
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 

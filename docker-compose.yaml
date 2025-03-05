@@ -7,4 +7,24 @@
     command: /bin/sh -c "alembic upgrade head && python -m app.main"
     env_file:
       - .env 
+    depends_on:
+      - db
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: porfolio
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    volumes:
+      - pgdata:/var/lib/postgresql/data 
+    expose:
+      - 5477
+    ports:
+      - "5477:5477"
 
+volumes:
+  pgdata:
+networks:
+  app_network:
+    driver: bridge

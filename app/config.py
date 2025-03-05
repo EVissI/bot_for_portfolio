@@ -4,7 +4,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.client.default import DefaultBotProperties
-from pydantic import SecretStr
+from pydantic import SecretStr,PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
 
@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     BASE_DIR: str = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     FORMAT_LOG: str = "{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}"
     LOG_ROTATION: str = "10 MB"
-    DB_URL: str = 'sqlite+aiosqlite:///app/data/db.sqlite3'
+    DB_URL: PostgresDsn
     BOT_TOKEN: SecretStr
     ROOT_ADMIN_IDS: List[int]
     PORT:int = 4566
