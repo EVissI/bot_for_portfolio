@@ -1,8 +1,8 @@
 ﻿import enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import BigInteger, Enum, Float, ForeignKey, String, event
+from sqlalchemy import BigInteger, Enum, Float, ForeignKey, String, Boolean
 from typing import Optional
-from dao.database import Base
+from app.dao.database import Base
 
 
 class User(Base):
@@ -20,11 +20,13 @@ class User(Base):
 
 class Project(Base):
     name: Mapped[str] = mapped_column(unique=True, nullable=False)
+    status: Mapped[bool] = mapped_column(Boolean, default=False)
+    img_id: Mapped[Optional[str]] =  mapped_column(String, default=None)
     description_small: Mapped[str]
     description_large: Mapped[str]
     telegram_bot_url: Mapped[str]
     developers: Mapped[str] = mapped_column(String, default='@Ebezin')
-    github_link: Mapped[str]
+    github_link: Mapped[Optional[str]]
     rating: Mapped[float] = mapped_column(Float, default=0)
     project_ratings: Mapped[list["ProjectRating"]] = relationship(back_populates="project")
 

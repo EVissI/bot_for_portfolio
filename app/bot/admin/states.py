@@ -7,7 +7,10 @@ class AdminPanelStates(StatesGroup):
 
 class UpdateProject(StatesGroup):
     name = State()
-    update = State()
+    update_menu = State()
+    update_base = State()
+    add_pic = State()
+    add_git = State()
     take_data_to_update = State()
 
 class DeleteProject(StatesGroup):
@@ -22,6 +25,5 @@ class AddProject(StatesGroup):
     description_small = State()
     description_large = State()
     telegram_bot_url = State()
-    github_link = State()
     confirm = State()
     change = State()

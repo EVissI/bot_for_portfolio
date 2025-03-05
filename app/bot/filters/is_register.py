@@ -2,9 +2,9 @@
 from typing import Any, Dict, Optional, Union
 from aiogram.types import Message, User
 from loguru import logger
-from dao.database import async_session_maker
-from bot.dao import UserDAO
-from bot.models import User as UserModel
+from app.dao.database import async_session_maker
+from app.bot.dao import UserDAO
+from app.bot.models import User as UserModel
 
 class IsRegisterFilter(BaseFilter):
     async def __call__(

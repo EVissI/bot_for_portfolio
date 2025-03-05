@@ -2,7 +2,8 @@ from typing import Dict
 from aiogram.types import ReplyKeyboardMarkup,ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from loguru import logger
-from bot.models import User
+
+from app.bot.models import User
 
 del_kbd = ReplyKeyboardRemove()
 

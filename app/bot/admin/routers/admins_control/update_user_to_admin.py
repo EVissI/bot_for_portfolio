@@ -4,13 +4,13 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from loguru import logger
-from bot.models import User
-from bot.schemas import TelegramIDModel, UserModel
-from bot.dao import UserDAO
-from bot.keyboard.markup_kb import MainKeyboard, back_button
-from bot.admin.states import AdminPanelStates, GiveAdminRight
-from dao.database import connection
-from config import bot
+from app.bot.models import User
+from app.bot.schemas import TelegramIDModel, UserModel
+from app.bot.dao import UserDAO
+from app.bot.keyboard.markup_kb import MainKeyboard, back_button
+from app.bot.admin.states import AdminPanelStates, GiveAdminRight
+from app.dao.database import connection
+from app.config import bot
 give_administrator_rights_router = Router()
 
 

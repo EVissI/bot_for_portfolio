@@ -3,11 +3,11 @@ from aiogram.types import Message
 from loguru import logger
 from aiogram.filters import StateFilter
 
-from bot.models import User
-from bot.dao import UserDAO
-from bot.keyboard.markup_kb import MainKeyboard
-from dao.database import connection
-from bot.admin.states import AdminPanelStates
+from app.bot.models import User
+from app.bot.dao import UserDAO
+from app.bot.keyboard.markup_kb import MainKeyboard
+from app.dao.database import connection
+from app.bot.admin.states import AdminPanelStates
 admin_list_router = Router()
 
 @admin_list_router.message(F.text == MainKeyboard.get_control_admins_kb().get('admin_list'),StateFilter(AdminPanelStates.admins_control))

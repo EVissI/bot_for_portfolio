@@ -1,18 +1,13 @@
-﻿import os
-import ssl
-import uvicorn
+﻿
+import asyncio
 from loguru import logger
-from fastapi import FastAPI, Request
-from contextlib import asynccontextmanager
 from aiogram.types import BotCommand, BotCommandScopeDefault
-from aiogram.types import Update,FSInputFile
-from config import bot,dp,settings
-from bot.middlewares.is_admin import CheckIsAdmin
-from bot.middlewares.anti_floud import AntiFloudMiddleware
-from bot.users.router import user_router
-from bot.admin.routers.main_router import admin_router
+from app.config import bot,dp,settings
+from app.bot.middlewares.is_admin import CheckIsAdmin
+from app.bot.middlewares.anti_floud import AntiFloudMiddleware
+from app.bot.users.router import user_router
+from app.bot.admin.routers.main_router import admin_router
 
-app = FastAPI()
 async def set_commands():
     commands = [BotCommand(command='start', description='Старт'),BotCommand(command='contact', description='контакты'),BotCommand(command='my_projects', description='мои проекты')]
     await bot.set_my_commands(commands, BotCommandScopeDefault())
@@ -37,24 +32,22 @@ async def stop_bot():
     logger.error("Бот остановлен!")
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
+
+async def main():
     logger.info("Starting bot setup...")
     admin_router.message.middleware(CheckIsAdmin())
-    dp.message.middleware(AntiFloudMiddleware(1))
+    dp.message.middleware(AntiFloudMiddleware(0.5))
     dp.include_router(admin_router)
     dp.include_router(user_router)
-    await start_bot()   
-    await dp.start_polling(bot,
-                        drop_pending_updates=True,
-                        allowed_updates=dp.resolve_used_update_types())
-    yield 
-    await dp.stop_polling()
-    logger.info("Shutting down bot...")
-    await stop_bot() 
-
-app = FastAPI(lifespan=lifespan)
+    try:
+        await start_bot()
+        await bot.delete_webhook(drop_pending_updates=True)
+        await dp.start_polling(bot)
+    finally:
+        await stop_bot()
+        await bot.session.close()
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", reload=False,reload_delay=3,port=settings.PORT,env_file= f"{settings.BASE_DIR}/.env")
+    asyncio.run(main())
+

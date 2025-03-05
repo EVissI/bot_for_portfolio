@@ -1,7 +1,7 @@
 ﻿
-from dao.base import BaseDAO
-from bot.models import User,Project,ProjectRating
-from bot.schemas import UserFilterModel,TelegramIDModel
+from app.dao.base import BaseDAO
+from app.bot.models import User,Project,ProjectRating
+from app.bot.schemas import UserFilterModel,TelegramIDModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 class UserDAO(BaseDAO[User]):

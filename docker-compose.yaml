@@ -1,0 +1,10 @@
+﻿services:
+  bot: 
+    build: .
+    container_name: porfolio-bot
+    expose:
+      - 4566
+    command: /bin/sh -c "alembic upgrade head && python -m app.main"
+    env_file:
+      - .env 
+

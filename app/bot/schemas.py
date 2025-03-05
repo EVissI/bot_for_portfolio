@@ -1,6 +1,6 @@
-﻿from pydantic import BaseModel, ConfigDict
+﻿from pydantic import BaseModel
 from typing import Optional
-from bot.models import User
+from app.bot.models import User
 
 class TelegramIDModel(BaseModel):
     telegram_id: int
@@ -32,7 +32,7 @@ class ProjectModel(ProjectNameModel):
     description_small: str
     description_large:str
     telegram_bot_url: str
-    github_link: str
+    github_link: Optional[str] = None
     rating:Optional[float] = None
 
 class ProjectFilterModel(BaseModel):

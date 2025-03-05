@@ -3,9 +3,9 @@ from typing import Callable, Awaitable, Dict, Any
 from aiogram import BaseMiddleware
 from aiogram.types import Message
 
-from bot.dao import UserDAO
-from bot.models import User
-from dao.database import async_session_maker
+from app.bot.dao import UserDAO
+from app.bot.models import User
+from app.dao.database import async_session_maker
 
 class CheckIsAdmin(BaseMiddleware):
     async def __call__(

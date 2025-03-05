@@ -5,13 +5,13 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from loguru import logger
 
-from bot.admin.common import add_project_final_msg
-from bot.models import User
-from bot.schemas import ProjectFilterModel, ProjectNameModel
-from bot.dao import ProjectDAO
-from dao.database import connection
-from bot.keyboard.markup_kb import MainKeyboard, CancelButton
-from bot.keyboard.inline_kb import AdminCallbackDeleteProject, ProjectList, confirm_del_kb, project_list_kb
+from app.bot.admin.common import add_project_final_msg
+from app.bot.models import User
+from app.bot.schemas import ProjectFilterModel, ProjectNameModel
+from app.bot.dao import ProjectDAO
+from app.dao.database import connection
+from app.bot.keyboard.markup_kb import MainKeyboard, CancelButton
+from app.bot.keyboard.inline_kb import AdminCallbackDeleteProject, ProjectList, confirm_del_kb, project_list_kb
 
 
 class DeleteProject(StatesGroup):

@@ -3,14 +3,14 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from loguru import logger
-from bot.keyboard.inline_kb import AdminLowerAdminToUser, admin_inline_list_kb
-from bot.models import User
-from bot.schemas import TelegramIDModel, UserModel
-from bot.dao import UserDAO
-from bot.keyboard.markup_kb import MainKeyboard
-from dao.database import connection
-from bot.admin.states import AdminPanelStates
-from config import settings
+from app.bot.keyboard.inline_kb import AdminLowerAdminToUser, admin_inline_list_kb
+from app.bot.models import User
+from app.bot.schemas import TelegramIDModel, UserModel
+from app.bot.dao import UserDAO
+from app.bot.keyboard.markup_kb import MainKeyboard
+from app.dao.database import connection
+from app.bot.admin.states import AdminPanelStates
+from app.config import settings
 remove_administrator_rights_router = Router()
 
 
@@ -61,13 +61,6 @@ async def process_removing_admin_rights(
                 await query.message.delete()
                 await query.message.answer(
                     f"Теперь {admin.first_name}[{admin.telegram_id}] понижен в звании и является обычным обывалой",
-                    reply_markup=MainKeyboard.build_admins_control_panel(),
-                )
-                await state.set_state(AdminPanelStates.admins_control)
-            case "cancel":
-                await query.message.delete()
-                await query.message.answer(
-                    "Пон, возвращаю в меню",
                     reply_markup=MainKeyboard.build_admins_control_panel(),
                 )
                 await state.set_state(AdminPanelStates.admins_control)

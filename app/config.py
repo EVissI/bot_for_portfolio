@@ -28,11 +28,6 @@ logger.add(log_file_path, format=settings.FORMAT_LOG, level="INFO", rotation=set
 log_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "log_error.txt")
 logger.add(log_file_path, format=settings.FORMAT_LOG, level="ERROR", rotation=settings.LOG_ROTATION)
 
-    #редис может понадобиться для хранения fsm состояния
-# redis = aioredis.from_url(
-#         settings.redis.url
-#     )
 bot = Bot(token=settings.BOT_TOKEN.get_secret_value(), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=MemoryStorage())
 
-# dp = Dispatcher(storage=RedisStorage(redis))

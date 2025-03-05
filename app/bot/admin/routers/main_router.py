@@ -4,16 +4,16 @@ from aiogram.filters import StateFilter
 
 from aiogram.fsm.context import FSMContext
 
-from bot.models import User
-from bot.admin.routers.projects_control.create_router import create_project
-from bot.admin.routers.projects_control.delete_router import delete_project
-from bot.admin.routers.projects_control.update_router import update_project
+from app.bot.models import User
+from app.bot.admin.routers.projects_control.create_router import create_project
+from app.bot.admin.routers.projects_control.delete_router import delete_project
+from app.bot.admin.routers.projects_control.update_router import update_project
 
-from bot.admin.routers.admins_control.admins_list import admin_list_router
-from bot.admin.routers.admins_control.update_admin_to_user import remove_administrator_rights_router
-from bot.admin.routers.admins_control.update_user_to_admin import give_administrator_rights_router
-from bot.keyboard.markup_kb import MainKeyboard
-from bot.admin.states import AdminPanelStates
+from app.bot.admin.routers.admins_control.admins_list import admin_list_router
+from app.bot.admin.routers.admins_control.update_admin_to_user import remove_administrator_rights_router
+from app.bot.admin.routers.admins_control.update_user_to_admin import give_administrator_rights_router
+from app.bot.keyboard.markup_kb import MainKeyboard
+from app.bot.admin.states import AdminPanelStates
 
 admin_router = Router()
 admin_router.include_router(create_project)

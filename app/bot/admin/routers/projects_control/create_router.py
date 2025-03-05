@@ -5,22 +5,22 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
 from loguru import logger
-from bot.admin.common import (
+from app.bot.admin.common import (
     add_project_final_msg,
     telegram_bot_url_pattern,
     https_link_pattern,
 )
-from bot.schemas import ProjectModel, ProjectNameModel
-from bot.dao import ProjectDAO
-from bot.keyboard.inline_kb import (
+from app.bot.schemas import ProjectModel, ProjectNameModel
+from app.bot.dao import ProjectDAO
+from app.bot.keyboard.inline_kb import (
     confirm_kb,
     change_kb,
     AdminCallbackProject,
     AdminCallbackProjectChange,
 )
-from bot.keyboard.markup_kb import CancelButton, MainKeyboard
-from bot.admin.states import AddProject, AdminPanelStates
-from dao.database import connection
+from app.bot.keyboard.markup_kb import CancelButton, MainKeyboard
+from app.bot.admin.states import AddProject, AdminPanelStates
+from app.dao.database import connection
 create_project = Router()
 
 
@@ -88,10 +88,11 @@ async def process_description_large(message: Message, state: FSMContext):
 )
 async def process_telegram_bot_url(message: Message, state: FSMContext):
     await state.update_data({"telegram_bot_url": message.text})
-    await state.set_state(AddProject.github_link)
-    await message.answer(
-        f"Введите ссылку на проект", reply_markup=CancelButton.build("create")
-    )
+    data = await state.get_data()
+    logger.info(data)
+    msg = await add_project_final_msg(data)
+    await message.answer(msg + "\n\nПодтвердите публикацию", reply_markup=confirm_kb())
+    await state.set_state(AddProject.confirm)
 
 
 @create_project.message(
@@ -102,26 +103,6 @@ async def warning_telegram_bot_url(message: Message, state: FSMContext):
         "Это не похоже на телеговскую ссылку на бота, она должна начинаться на @ и заканчиваться bot\nпопробуйте снова"
     )
 
-
-@create_project.message(
-    F.text.regexp(https_link_pattern),
-    StateFilter(AddProject.github_link),
-)
-async def process_github_link(message: Message, state: FSMContext):
-    await state.update_data({"github_link": message.text})
-
-    data = await state.get_data()
-    logger.info(data)
-    msg = await add_project_final_msg(data)
-    await message.answer(msg + "\n\nПодтвердите публикацию", reply_markup=confirm_kb())
-    await state.set_state(AddProject.confirm)
-
-
-@create_project.message(
-    ~F.text.regexp(https_link_pattern), StateFilter(AddProject.github_link)
-)
-async def warning_github_link(message: Message, state: FSMContext):
-    await message.answer("Это не похоже на ссылку, попробуйте снова")
 
 
 @create_project.callback_query(AdminCallbackProject.filter())
@@ -140,7 +121,6 @@ async def process_confirm(
             description_small=data.get("description_small"),
             description_large=data.get("description_large"),
             telegram_bot_url=data.get("telegram_bot_url"),
-            github_link=data.get("github_link"),
         )
         await ProjectDAO.add(session, values)
         await query.message.delete()
@@ -198,12 +178,6 @@ async def process_change_msg(message: Message, state: FSMContext):
                 await message.answer(
                     "Это не похоже на телеговскую ссылку на бота, она должна начинаться на @ и заканчиваться bot\nпопробуйте снова"
                 )
-                return
-        case "github_link":
-            if re.match(https_link_pattern, message.text):
-                await state.update_data({"github_link": message.text})
-            else:
-                await message.answer("Это не похоже на ссылку, попробуйте снова")
                 return
         case _:
             await state.update_data({data.get("changed_state"): message.text})

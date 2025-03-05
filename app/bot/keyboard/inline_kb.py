@@ -3,8 +3,8 @@ from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from loguru import logger
 from aiogram.filters.callback_data import CallbackData
-from bot.models import User
-from bot.admin.common import state_dict
+from app.bot.models import User
+from app.bot.admin.common import state_dict
 
 class AdminCallbackProject(CallbackData, prefix="add_project"):
     action: str
@@ -25,8 +25,13 @@ class AdminCallbackDeleteProject(CallbackData, prefix="delete_project"):
 class AdminCallbackProjectChange(CallbackData, prefix="project_change"):
     action:str
 
-class AdminCallbackProjectUpdate(CallbackData, prefix="project_update"):
+class AdminCallbackProjectUpdateBaseInfo(CallbackData, prefix="project_update_base_info"):
     action:str
+
+
+class AdminCallbackProjectUpdateMenu(CallbackData, prefix="project_update_menu"):
+    action:str
+
 
 class VoteProject(CallbackData, prefix="rating"):
     vote:int
@@ -91,17 +96,40 @@ def change_kb() -> InlineKeyboardMarkup:
     kb.adjust(1)
     return kb.as_markup()   
 
-def update_kb() -> InlineKeyboardMarkup:
+def update_menu() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(
+            text='Добавить пикчу к проекту',
+            callback_data=AdminCallbackProjectUpdateMenu(
+                action = 'add_pic'
+            ).pack()
+        )
+    kb.button(
+        text='Добавить ссылку на репозиторий',
+        callback_data=AdminCallbackProjectUpdateMenu(
+            action = 'add_git'
+        ).pack()
+    )
+    kb.button(
+            text='Изменить основные поля проекта',
+            callback_data=AdminCallbackProjectUpdateMenu(
+                action = 'update_project'
+            ).pack()
+        )
+    kb.adjust(1)
+    return kb.as_markup()
+
+def update_base_info_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     for key,val in state_dict.items():
         kb.button(
             text=val,
-            callback_data=AdminCallbackProjectUpdate(
+            callback_data=AdminCallbackProjectUpdateBaseInfo(
                 action = key
             ).pack()
         )
     kb.button(text='👌Сохранить',
-            callback_data=AdminCallbackProjectUpdate(
+            callback_data=AdminCallbackProjectUpdateBaseInfo(
                 action = 'save'
             ).pack())
     kb.adjust(1)
@@ -128,14 +156,7 @@ def project_list_kb(project_names:list[str],action:str,page=0)-> InlineKeyboardM
             page=page,
             is_empety=False
         ).pack())
-    if len(current_objects) % 3 != 0:
-        for i in range((len(current_objects) % 3)+1):
-            kb.button(text=' ',callback_data=ProjectList(
-                action=action,
-                name= None,
-                page=page,
-                is_empety=True
-            ).pack())
+        
     if len(project_names) > max_buttons:
         if page > 0:
             kb.button(text="<-", callback_data=ProjectList(
@@ -152,7 +173,14 @@ def project_list_kb(project_names:list[str],action:str,page=0)-> InlineKeyboardM
                 page=page +1 ,
                 is_empety=False
             ).pack())
-    kb.adjust(3,3,2)
+
+
+    if len(current_objects) <= 3:
+        kb.adjust(len(current_objects))
+    elif len(current_objects) <= 6:
+        kb.adjust(3, 3)
+    else:
+        kb.adjust(3, 3, 2)
     return kb.as_markup()
 
 def admin_inline_list_kb(admins:list[User]) -> InlineKeyboardMarkup:
@@ -165,14 +193,7 @@ def admin_inline_list_kb(admins:list[User]) -> InlineKeyboardMarkup:
                 telegram_id=admin.telegram_id
             ).pack()
         )
-    kb.button(
-            text="Назад",
-            callback_data=AdminLowerAdminToUser(
-                action='cancel',
-                telegram_id=None
-            ).pack()
-        )
-    kb.adjust(*(3 for _ in range(len(admins) // 3)), 1)
+    kb.adjust(*(3 for _ in range(len(admins) // 3)))
     return kb.as_markup()
 
 

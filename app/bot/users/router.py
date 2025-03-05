@@ -6,18 +6,18 @@ from aiogram.filters import CommandObject, CommandStart,Command
 
 from loguru import logger
 
-from bot.filters.is_register import IsRegisterFilter
-from bot.keyboard.markup_kb import MainKeyboard
-from bot.models import User,Project,ProjectRating
-from bot.keyboard.inline_kb import vote_rating_kb,VoteProject
-from bot.schemas import (TelegramIDModel, 
+from app.bot.filters.is_register import IsRegisterFilter
+from app.bot.keyboard.markup_kb import MainKeyboard
+from app.bot.models import User,Project,ProjectRating
+from app.bot.keyboard.inline_kb import vote_rating_kb,VoteProject
+from app.bot.schemas import (TelegramIDModel, 
                         UserModel,
                         ProjectModel,ProjectFilterModel,ProjectNameModel,
                         ProjectRatingModel,ProjectRatingFilterModel)
-from dao.database import connection
-from bot.dao import UserDAO, ProjectDAO,ProjectRatingDAO
+from app.dao.database import connection
+from app.bot.dao import UserDAO, ProjectDAO,ProjectRatingDAO
 
-from config import settings,bot
+from app.config import settings,bot
 
 from . import start_message, contact_message,vote_responses
 
@@ -91,14 +91,18 @@ async def cmd_full_info_project(message: Message, command: CommandObject, user_i
                     f'👨‍💻 <b>Разработчик(и)</b>: {project.developers}',
                     f'📝 <b>Описание</b>: {project.description_large}',
                     f'🤖 <b>Ссылка на бота</b>: {project.telegram_bot_url}',
-                    f'🔗 <b>Ссылка на исходный код</b>: <a href = "{project.github_link}">{project.github_link}</a>',
+                    f'🔗 <b>Ссылка на исходный код</b>: <a href = "{project.github_link}">{project.github_link}</a>' if project.github_link else '',
                     f'⭐ <b>Оценка</b>: {project.rating}',
                     '\n',
                     'Мне очень важно ваше мнение, пожалуйста оцените проект:'
                 ]
             )
-            await message.answer(msg, reply_markup=vote_rating_kb(project_name, user_info.telegram_id))
-            return
+            if project.img_id:
+                await message.answer_photo(project.img_id,caption=msg,reply_markup=vote_rating_kb(project_name, user_info.telegram_id))
+                return
+            else:
+                await message.answer(msg, reply_markup=vote_rating_kb(project_name, user_info.telegram_id))
+                return
         await message.answer('Такого проекта у меня нет ☹')
     except Exception as e:
         logger.error(f"Ошибка при выполнении команды информации о проекте для пользователя {message.from_user.id}: {e}")
