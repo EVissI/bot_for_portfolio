@@ -32,6 +32,9 @@ class ProjectModel(ProjectNameModel):
     description_small: str
     description_large:str
     telegram_bot_url: str
+    status:bool = False
+    img_id:Optional[str] = None
+    developers: str = '@Ebezin'
     github_link: Optional[str] = None
     rating:Optional[float] = None
 
@@ -41,7 +44,10 @@ class ProjectFilterModel(BaseModel):
     description_large:Optional[str] = None
     telegram_bot_url: Optional[str] = None
     github_link: Optional[str] = None
-
+    rating:Optional[float] = None 
+    developers:Optional[str] = None
+    img_id:Optional[str] = None
+    status: Optional[bool] = None
     class Config:
         from_attributes = True
 

@@ -143,16 +143,10 @@ async def vote_project(query: CallbackQuery, callback_data: VoteProject, user_in
         all_votes = await ProjectRatingDAO.find_all(session, ProjectRatingFilterModel(project_name=callback_data.project_name))
         new_rating = sum(rating.rating for rating in all_votes) / len(all_votes)
         project: Project = await ProjectDAO.find_one_or_none(session, ProjectNameModel(name=callback_data.project_name))
+        project.rating = new_rating
         await ProjectDAO.update(session,
                                 ProjectNameModel(name=callback_data.project_name),
-                                ProjectModel(
-                                    name=project.name,
-                                    description_small=project.description_small,
-                                    description_large=project.description_small,
-                                    telegram_bot_url=project.telegram_bot_url,
-                                    github_link=project.github_link,
-                                    rating=new_rating
-                                ))
+                                ProjectModel.model_validate(project.to_dict()))
 
         pattern = r"(<b>Оценка</b>:\s*)\d+(\.\d+)?"
         new_text = re.sub(pattern, f'<b>Оценка</b>: {str(new_rating)}', query.message.html_text)
