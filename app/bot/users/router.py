@@ -14,7 +14,7 @@ from app.bot.schemas import (TelegramIDModel,
                         UserModel,
                         ProjectModel,ProjectFilterModel,ProjectNameModel,
                         ProjectRatingModel,ProjectRatingFilterModel)
-from app.dao.database import connection
+from app.dao.database import connection, async_session_maker
 from app.bot.dao import UserDAO, ProjectDAO,ProjectRatingDAO
 
 from app.config import settings,bot
@@ -110,50 +110,50 @@ async def cmd_full_info_project(message: Message, command: CommandObject, user_i
 
 
 @user_router.callback_query(VoteProject.filter(), IsRegisterFilter())
-@connection()
-async def vote_project(query: CallbackQuery, callback_data: VoteProject, user_info: User, session, **kwargs):
+async def vote_project(query: CallbackQuery, callback_data: VoteProject, user_info: User):
     try:
-        is_voted = await ProjectRatingDAO.find_one_or_none(
-            session,
-            ProjectRatingFilterModel(
-                telegram_user_id=callback_data.telegram_id,
-                project_name=callback_data.project_name
-            )
-        )
-
-        rating_model = ProjectRatingModel(
-            rating=callback_data.vote,
-            telegram_user_id=callback_data.telegram_id,
-            project_name=callback_data.project_name
-        )
-
-        if is_voted:
-            await ProjectRatingDAO.update(
+        async with async_session_maker() as session:
+            is_voted = await ProjectRatingDAO.find_one_or_none(
                 session,
                 ProjectRatingFilterModel(
                     telegram_user_id=callback_data.telegram_id,
                     project_name=callback_data.project_name
-                ),
-                rating_model
+                )
             )
-        else:
-            await ProjectRatingDAO.add(session, rating_model)
-        await query.answer(vote_responses.get(callback_data.vote, "Спасибо за ваш отзыв!"))
 
-        all_votes = await ProjectRatingDAO.find_all(session, ProjectRatingFilterModel(project_name=callback_data.project_name))
-        new_rating = sum(rating.rating for rating in all_votes) / len(all_votes)
-        project: Project = await ProjectDAO.find_one_or_none(session, ProjectNameModel(name=callback_data.project_name))
-        project.rating = new_rating
-        await ProjectDAO.update(session,
-                                ProjectNameModel(name=callback_data.project_name),
-                                ProjectModel.model_validate(project.to_dict()))
+            rating_model = ProjectRatingModel(
+                rating=callback_data.vote,
+                telegram_user_id=callback_data.telegram_id,
+                project_name=callback_data.project_name
+            )
 
-        pattern = r"(<b>Оценка</b>:\s*)\d+(\.\d+)?"
-        new_text = re.sub(pattern, f'<b>Оценка</b>: {str(new_rating)}', query.message.html_text)
-        if project.img_id:
-            await query.message.edit_caption(caption=new_text, reply_markup=query.message.reply_markup)
-        else:
-            await query.message.edit_text(new_text, reply_markup=query.message.reply_markup)
+            if is_voted:
+                await ProjectRatingDAO.update(
+                    session,
+                    ProjectRatingFilterModel(
+                        telegram_user_id=callback_data.telegram_id,
+                        project_name=callback_data.project_name
+                    ),
+                    rating_model
+                )
+            else:
+                await ProjectRatingDAO.add(session, rating_model)
+            await query.answer(vote_responses.get(callback_data.vote, "Спасибо за ваш отзыв!"))
+        async with async_session_maker() as session:
+            all_votes = await ProjectRatingDAO.find_all(session, ProjectRatingFilterModel(project_name=callback_data.project_name))
+            new_rating = sum(rating.rating for rating in all_votes) / len(all_votes)
+            project: Project = await ProjectDAO.find_one_or_none(session, ProjectNameModel(name=callback_data.project_name))
+            project.rating = new_rating
+            await ProjectDAO.update(session,
+                                    ProjectNameModel(name=callback_data.project_name),
+                                    ProjectModel.model_validate(project.to_dict()))
+
+            pattern = r"(<b>Оценка</b>:\s*)\d+(\.\d+)?"
+            new_text = re.sub(pattern, f'<b>Оценка</b>: {str(new_rating)}', query.message.html_text)
+            if project.img_id:
+                await query.message.edit_caption(caption=new_text, reply_markup=query.message.reply_markup)
+            else:
+                await query.message.edit_text(new_text, reply_markup=query.message.reply_markup)
     except Exception as e:
         logger.error('Ошибка при попытке оценивания:' + str(e))
         await query.answer('Чет пошло не так')
