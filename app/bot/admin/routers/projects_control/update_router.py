@@ -19,7 +19,7 @@ from app.bot.dao import ProjectDAO
 from app.bot.schemas import ProjectNameModel, ProjectModel, ProjectFilterModel
 from app.dao.database import connection
 from app.bot.keyboard.markup_kb import CancelButton, MainKeyboard
-from app.bot.admin.common import https_link_pattern, telegram_bot_url_pattern
+from app.bot.admin.common import https_link_pattern
 
 
 update_project = Router()
@@ -216,17 +216,7 @@ async def warning_not_text(message: Message):
 @update_project.message(StateFilter(UpdateProject.take_data_to_update))
 async def process_update_project_msg(message: Message, state: FSMContext):
     data = await state.get_data()
-    match data["update_data"]:
-        case "telegram_bot_url":
-            if re.match(telegram_bot_url_pattern, message.text):
-                await state.update_data({"telegram_bot_url": message.text})
-            else:
-                await message.answer(
-                    "Это не похоже на телеговскую ссылку на бота, она должна начинаться на @ и заканчиваться bot\nпопробуйте снова"
-                )
-                return
-        case _:
-            await state.update_data({data["update_data"]: message.text})
+    await state.update_data({data["update_data"]: message.text})
     await state.set_state(UpdateProject.update_base)
     data = await state.get_data()
     msg = await add_project_final_msg(data)

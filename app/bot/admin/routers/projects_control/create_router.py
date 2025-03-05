@@ -7,7 +7,6 @@ from aiogram.fsm.context import FSMContext
 from loguru import logger
 from app.bot.admin.common import (
     add_project_final_msg,
-    telegram_bot_url_pattern,
     https_link_pattern,
 )
 from app.bot.schemas import ProjectModel, ProjectNameModel
@@ -83,7 +82,7 @@ async def process_description_large(message: Message, state: FSMContext):
 
 
 @create_project.message(
-    F.text.regexp(telegram_bot_url_pattern),
+    F.text,
     StateFilter(AddProject.telegram_bot_url),
 )
 async def process_telegram_bot_url(message: Message, state: FSMContext):
@@ -93,15 +92,6 @@ async def process_telegram_bot_url(message: Message, state: FSMContext):
     msg = await add_project_final_msg(data)
     await message.answer(msg + "\n\nПодтвердите публикацию", reply_markup=confirm_kb())
     await state.set_state(AddProject.confirm)
-
-
-@create_project.message(
-    ~F.text.regexp(telegram_bot_url_pattern), StateFilter(AddProject.telegram_bot_url)
-)
-async def warning_telegram_bot_url(message: Message, state: FSMContext):
-    await message.answer(
-        "Это не похоже на телеговскую ссылку на бота, она должна начинаться на @ и заканчиваться bot\nпопробуйте снова"
-    )
 
 
 
@@ -170,17 +160,7 @@ async def process_change_qr(
 @create_project.message(StateFilter(AddProject.change))
 async def process_change_msg(message: Message, state: FSMContext):
     data = await state.get_data()
-    match data.get("changed_state"):
-        case "telegram_bot_url":
-            if re.match(telegram_bot_url_pattern, message.text):
-                await state.update_data({"telegram_bot_url": message.text})
-            else:
-                await message.answer(
-                    "Это не похоже на телеговскую ссылку на бота, она должна начинаться на @ и заканчиваться bot\nпопробуйте снова"
-                )
-                return
-        case _:
-            await state.update_data({data.get("changed_state"): message.text})
+    await state.update_data({data.get("changed_state"): message.text})
     await state.set_state(AddProject.confirm)
     data = await state.get_data()
     msg = await add_project_final_msg(data)
