@@ -150,7 +150,10 @@ async def vote_project(query: CallbackQuery, callback_data: VoteProject, user_in
 
         pattern = r"(<b>Оценка</b>:\s*)\d+(\.\d+)?"
         new_text = re.sub(pattern, f'<b>Оценка</b>: {str(new_rating)}', query.message.html_text)
-        await query.message.edit_text(new_text, reply_markup=query.message.reply_markup)
+        if project.img_id:
+            await query.message.edit_caption(caption=new_text, reply_markup=query.message.reply_markup)
+        else:
+            await query.message.edit_text(new_text, reply_markup=query.message.reply_markup)
     except Exception as e:
         logger.error('Ошибка при попытке оценивания:' + str(e))
         await query.answer('Чет пошло не так')
