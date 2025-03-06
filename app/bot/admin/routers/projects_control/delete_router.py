@@ -7,8 +7,8 @@ from loguru import logger
 
 from app.bot.admin.common import add_project_final_msg
 from app.bot.models import User
-from app.bot.schemas import ProjectFilterModel, ProjectNameModel
-from app.bot.dao import ProjectDAO
+from app.bot.schemas import ProjectFilterModel, ProjectNameModel,ProjectRatingFilterModel
+from app.bot.dao import ProjectDAO,ProjectRatingDAO
 from app.dao.database import connection
 from app.bot.keyboard.markup_kb import MainKeyboard, CancelButton
 from app.bot.keyboard.inline_kb import AdminCallbackDeleteProject, ProjectList, confirm_del_kb, project_list_kb
@@ -75,6 +75,7 @@ async def process_delete_project_qr(
     if callback_data.action == "yes":
         project_name = (await state.get_data()).get('name')
         logger.info(project_name)
+        await ProjectRatingDAO.delete(session=session,filters=ProjectRatingFilterModel(project_name=project_name))
         await ProjectDAO.delete(
             session=session, filters=ProjectNameModel(name=project_name)
         )
