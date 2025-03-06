@@ -1,7 +1,7 @@
 ﻿import re
 
 from aiogram import F,Router
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, InputMediaPhoto
 from aiogram.filters import CommandObject, CommandStart,Command
 
 from loguru import logger
@@ -151,7 +151,7 @@ async def vote_project(query: CallbackQuery, callback_data: VoteProject, user_in
             pattern = r"(<b>Оценка</b>:\s*)\d+(\.\d+)?"
             new_text = re.sub(pattern, f'<b>Оценка</b>: {str(new_rating)}', query.message.html_text)
             if project.img_id:
-                await query.message.edit_caption(caption=new_text, reply_markup=query.message.reply_markup)
+                await query.message.edit_media(InputMediaPhoto(media=project.img_id,caption=new_text), reply_markup=query.message.reply_markup)
             else:
                 await query.message.edit_text(new_text, reply_markup=query.message.reply_markup)
     except Exception as e:
