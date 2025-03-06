@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 from loguru import logger
 
 from app.bot.admin.common import add_project_final_msg
+from app.bot.admin.states import AdminPanelStates
 from app.bot.models import User
 from app.bot.schemas import ProjectFilterModel, ProjectNameModel,ProjectRatingFilterModel
 from app.bot.dao import ProjectDAO,ProjectRatingDAO
@@ -61,7 +62,7 @@ async def process_project_name(query: CallbackQuery, callback_data: ProjectList,
 
 @delete_project.message(StateFilter(DeleteProject) and F.text == CancelButton.get_cancel_texts().get("delete") )
 async def cmd_cancel(message: Message, state: FSMContext):
-    await state.clear()
+    await state.set_state(AdminPanelStates.project_control)
     await message.answer(
         f"Ок,возвращаю в главное меню", reply_markup= MainKeyboard.build_project_cotrol_panel()
     )
@@ -81,7 +82,8 @@ async def process_delete_project_qr(
         )
         await query.message.delete()
         await query.message.answer(f'Удалил проект {project_name}',reply_markup= MainKeyboard.build_project_cotrol_panel())
+        await state.set_state(AdminPanelStates.project_control)    
     if callback_data.action == "no":
         await query.message.delete()
-        await state.clear()
+        await state.set_state(AdminPanelStates.project_control)    
         await query.message.answer(f'Не надо, так не надо',reply_markup=  MainKeyboard.build_project_cotrol_panel())
