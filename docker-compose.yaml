@@ -1,30 +1,46 @@
 ﻿services:
-  bot: 
+  bot:
     build: .
-    container_name: porfolio-bot
-    expose:
-      - 4566
+    container_name: portfolio-bot
+    restart: unless-stopped
+    ports:
+      - "4566:4566"
     command: /bin/sh -c "alembic upgrade head && python -m app.main"
     env_file:
-      - .env 
+      - .env
     depends_on:
       - db
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
   db:
-    image: postgres
-    restart: always
+    image: postgres:15-alpine
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: porfolio
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - pgdata:/var/lib/postgresql/data 
-    expose:
-      - 5477
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     ports:
-      - "5477:5477"
+      - "5432:5432"
 
 volumes:
   pgdata:
+
 networks:
   app_network:
     driver: bridge

@@ -13,12 +13,20 @@ class Settings(BaseSettings):
     BASE_DIR: str = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     FORMAT_LOG: str = "{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}"
     LOG_ROTATION: str = "10 MB"
-    DB_URL: PostgresDsn
+
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: SecretStr
+    POSTGRES_DB: str = "portfolio"
+    POSTGRES_HOST: str = "db"
+    
     BOT_TOKEN: SecretStr
     ROOT_ADMIN_IDS: List[int]
     PORT:int = 4566
     model_config = SettingsConfigDict(env_file=f"{BASE_DIR}/.env")
 
+    @property
+    def DB_URL(self):
+        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD.get_secret_value()}@{self.POSTGRES_HOST}:5432/{self.POSTGRES_DB}"
 
 settings = Settings()
 
